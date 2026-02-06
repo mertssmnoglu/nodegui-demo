@@ -1,54 +1,140 @@
-import { QMainWindow, QWidget, QLabel, QPushButton, QIcon, QBoxLayout, Direction } from '@nodegui/nodegui';
-import * as path from "node:path";
 import sourceMapSupport from 'source-map-support';
+import { Application } from './Application';
+import { Label, Button } from './components';
+import { defaultStyles } from './config/styles';
+import { MotorController } from './lib/MotorController';
 
 sourceMapSupport.install();
 
-
 function main(): void {
-  const win = new QMainWindow();
-  win.setWindowTitle("Hello World");
+  console.log('[DEBUG] Application starting...');
+  console.log('hello world test1');
 
-  const centralWidget = new QWidget();
+  // Initialize motor controller directly
+  const motor = new MotorController();
 
-  const rootLayout = new QBoxLayout(Direction.TopToBottom);
-  centralWidget.setObjectName("myroot");
-  centralWidget.setLayout(rootLayout);
+  // Execute motor control commands
+  motor.stepLeft(3);
+  motor.stepRight(5);
+  motor.stepUp(2);
+  motor.stepDown(1);
+  
+  const position = motor.getPosition();
+  console.log('Current motor position:', position);
+  
+  motor.moveTo(10, 15);
+  motor.setStepSize(2);
+  motor.stepLeft(2);
+  
+  const status = motor.getStatus();
+  console.log('Motor status:', status);
 
-  const label = new QLabel();
-  label.setObjectName("mylabel");
-  label.setText("Hello");
+  // Create the counter application
+  const app = new Application({
+    title: 'Counter App',
+    styles: defaultStyles,
+  });
 
-  const button = new QPushButton();
-  button.setIcon(new QIcon(path.join(__dirname, '../assets/logox200.png')));
+  // Initialize counter state
+  let counter = 0;
+  console.log(`[DEBUG] Initial counter value: ${counter}`);
 
-  const label2 = new QLabel();
-  label2.setText("World");
-  label2.setInlineStyle(`
-    color: red;
-  `);
-
-  rootLayout.addWidget(label);
-  rootLayout.addWidget(button);
-  rootLayout.addWidget(label2);
-  win.setCentralWidget(centralWidget);
-  win.setStyleSheet(
-  `
-    #myroot {
-      background-color: #009688;
-      height: '100%';
-      align-items: 'center';
-      justify-content: 'center';
-    }
-    #mylabel {
-      font-size: 16px;
+  // Create counter label
+  const counterLabel = new Label(`Counter: ${counter}`)
+    .setObjectName('mylabel')
+    .setInlineStyle(`
+      font-size: 24px;
       font-weight: bold;
-      padding: 1;
-    }
-  `
-  );
-  win.show();
+      padding: 10px;
+      color: #333;
+    `);
 
-  (global as any).win = win;
+  // Create increment button
+  const incrementButton = new Button('+')
+    .setInlineStyle(`
+      font-size: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+    `)
+    .onClick(() => {
+      counter++;
+      counterLabel.setText(`Counter: ${counter}`);
+      console.log(`[DEBUG] Counter incremented to: ${counter}`);
+
+      // Execute motor commands on increment
+      motor.stepRight(1);
+      const pos = motor.getPosition();
+      console.log('Motor moved right. Position:', pos);
+      
+      if (counter % 3 === 0) {
+        console.log(`Counter is divisible by 3!`);
+        motor.stepUp(1);
+      }
+      
+      if (counter % 5 === 0) {
+        console.log(`Counter hit ${counter}!`);
+        motor.home();
+      }
+    });
+
+  // Create decrement button
+  const decrementButton = new Button('-')
+    .setInlineStyle(`
+      font-size: 20px;
+      padding: 10px 20px;
+      background-color: #f44336;
+      color: white;
+      border-radius: 5px;
+    `)
+    .onClick(() => {
+      counter--;
+      counterLabel.setText(`Counter: ${counter}`);
+      console.log(`[DEBUG] Counter decremented to: ${counter}`);
+      
+      // Execute motor commands on decrement
+      motor.stepLeft(1);
+      const pos = motor.getPosition();
+      console.log('Motor moved left. Position:', pos);
+    });
+
+  // Create reset button
+  const resetButton = new Button('Reset')
+    .setInlineStyle(`
+      font-size: 16px;
+      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      border-radius: 5px;
+    `)
+    .onClick(() => {
+      const oldValue = counter;
+      counter = 0;
+      counterLabel.setText(`Counter: ${counter}`);
+      console.log('[DEBUG] Counter reset to 0');
+      console.log(`Reset from ${oldValue}`);
+      
+      // Home the motor on reset
+      motor.home();
+      console.log('Motor returned to home position');
+    });
+
+  // Info label
+  const infoLabel = new Label('Click + to increment, - to decrement')
+    .setInlineStyle(`
+      color: #666;
+      font-size: 12px;
+      padding: 10px;
+    `);
+
+  // Add all components to the application
+  app
+    .addComponents(counterLabel, incrementButton, decrementButton, resetButton, infoLabel)
+    .show();
+
+  console.log('[DEBUG] Counter app initialized successfully!');
+  console.log('Motor controller ready');
 }
+
 main();

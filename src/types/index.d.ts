@@ -23,5 +23,5 @@ export interface IApplicationConfig {
 export interface MotorPosition {
     x: number;
     y: number;
-    direction: 'left' | 'right' | 'up' | 'down' | 'idle';
+    direction: "left" | "right" | "up" | "down" | "idle";
 }

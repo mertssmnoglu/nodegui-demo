@@ -25,6 +25,7 @@
   "homepage": "https://github.com/sedwards2009/nodegui-simple-starter#readme",
   "devDependencies": {
     "@types/node": "^20.3.1",
+    "@types/source-map-support": "^0.5.10",
     "esbuild": "^0.25.0",
     "jam-pack-nodegui": "^0.18.0",
     "rimraf": "^5.0.1",

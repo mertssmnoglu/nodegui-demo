@@ -28,15 +28,9 @@
     }
   },
   "assist": {
-    "enabled": true,
     "actions": {
       "source": {
-        "organizeImports": {
-          "options": {
-            "identifierOrder": "lexicographic"
-          },
-          "level": "on"
-        }
+        "organizeImports": "on"
       }
     }
   }

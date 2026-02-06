@@ -1,12 +1,8 @@
-import {
-  Direction,
-  QBoxLayout,
-  QMainWindow,
-  QWidget,
-} from "@nodegui/nodegui";
+import { Direction, QBoxLayout, QMainWindow, QWidget } from "@nodegui/nodegui";
+
+import type { BaseComponent } from "@/components/index.js";
 import { defaultStyles, generateStyleSheet } from "@/config/styles.js";
 import type { IApplicationConfig } from "@/types/index.js";
-import type { BaseComponent } from "@/components/index.js";
 
 /**
  * Main application class that manages the window and layout
@@ -34,11 +30,13 @@ export class Application {
    * Initialize the application window
    */
   private initialize(): void {
-    this.window.setWindowTitle(this.config.title!);
+    this.window.setWindowTitle(this.config.title || "");
     this.centralWidget.setObjectName("myroot");
     this.centralWidget.setLayout(this.layout);
     this.window.setCentralWidget(this.centralWidget);
-    this.window.setStyleSheet(generateStyleSheet(this.config.styles!));
+    this.window.setStyleSheet(
+      generateStyleSheet(this.config.styles || defaultStyles),
+    );
   }
 
   /**
@@ -53,7 +51,9 @@ export class Application {
    * Add multiple components at once
    */
   public addComponents(...components: BaseComponent[]): this {
-    components.forEach((component) => this.addComponent(component));
+    components.forEach((component) => {
+      this.addComponent(component);
+    });
     return this;
   }
 
@@ -78,7 +78,7 @@ export class Application {
   public show(): this {
     this.window.show();
     // Keep reference to prevent garbage collection
-    (global as any).win = this.window;
+    (global as Record<string, unknown>).win = this.window;
     return this;
   }
 
